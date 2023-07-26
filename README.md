@@ -1,6 +1,6 @@
 # TFS_EPU_parser
 
-A simple Python 3 script to parse EPU session files.
+A simple Python 3 script to parse EPU session files. No dependencies or installation is required!
 
 This script can be useful to analyze EPU parameters from sessions of different facility users. It will analyze **EpuSession.dm** (one per session) and a FoilHole data xml file (from a first found movie), then create a CSV table.
 
@@ -10,11 +10,9 @@ How to use
 1) Locate *EpuSession.dm* files. You can use **get_files.sh** as an example script to find all files modified in 2023. This script will output a list of file paths (see **examples/scope0**).
 2) Run the main script:
 
-.. code-block:: python
+   ``python3 parse_epu_session.py /path/to/scope0``
 
-    python3 parse_epu_session.py /path/to/scope0
-
-It will generate **scope0.csv** which you can see in examples folder.
+   It will generate **scope0.csv** which you can see in examples folder.
 
 3) PROFIT!! You are done. You can analyse the output CSV in any way you like with downstream tools.
 
