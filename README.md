@@ -20,45 +20,45 @@ How to use
 CSV columns
 -----------
 
-* Autofocus distance
+* Autofocus distance (um)
 * Autofocus recurrence
-* BeamSize
+* BeamSize (um)
 * Binning
-* C2Aperture
+* C2Aperture (um)
 * ClusteringMode
-* ClusteringRadius
-* Defocus list
-* DelayAfterImageShift
-* DelayAfterStageShift
+* ClusteringRadius (um)
+* Defocus list (um)
+* DelayAfterImageShift (s)
+* DelayAfterStageShift (s)
 * Detector
-* Dose
+* Dose (e/A^2)
 * DoseFractionsOutputFormat
-* DoseOnCamera
-* DosePerFrame
+* DoseOnCamera (e/unbinned_px/s)
+* DosePerFrame (e/A^2/frame)
 * Drift recurrence
-* Drift threshold
-* EnergySelectionSlitWidth
+* Drift threshold (m/s)
+* EnergySelectionSlitWidth (eV)
 * EPUversion
-* ExposureTime
-* ExtractorVoltage
+* ExposureTime (s)
+* ExtractorVoltage (V)
 * GunLens
-* HoleSize
-* HoleSpacing
+* HoleSize (um)
+* HoleSpacing (um)
 * Magnification
 * MicroscopeID
 * Mode
 * Name
-* Number of exposures
+* Number of exposures (per hole)
 * NumSubFrames
-* ObjAperture
+* ObjAperture (um)
 * PhasePlateEnabled
 * PhasePlateUsed
-* PixelSpacing
+* PixelSpacing (A)
 * ProbeMode
 * SpecimenCarrierType
 * SpotSize
 * StartDateTime
-* Voltage
+* Voltage (kV)
 
 ![image](https://github.com/azazellochg/TFS_EPU_parser/assets/6952870/ceeb41ae-b9cc-4ae9-bd49-6216c58bb013)
 ![image](https://github.com/azazellochg/TFS_EPU_parser/assets/6952870/279ea58f-03a4-4aec-a3c9-7462ffe2e31b)
