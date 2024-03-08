@@ -23,9 +23,15 @@ nspace = {
 
 
 def parseFiles(path):
-    dicts = []
+    dicts = list()
     with open(path) as f:
         files = f.readlines()
+
+    fnOut = os.path.splitext(os.path.basename(path))[0] + ".csv"
+    if os.path.exists(fnOut):
+        os.remove(fnOut)
+
+    ofile = open(fnOut, 'a+')
 
     for sessionFn in files:
         sessionFn = sessionFn.rstrip("\n")
@@ -33,29 +39,36 @@ def parseFiles(path):
             continue
 
         sessionDir = os.path.dirname(sessionFn)
-        files2 = iglob(os.path.join(sessionDir, "Images-Disc*/GridSquare*/Data/FoilHole_*_Data_*.xml"), recursive=True)
+        files2 = iglob(os.path.join(sessionDir, "Images-Disc*/GridSquare*/Data/FoilHole_*_Data_*.xml"),
+                       recursive=True)
         holeFn = next(files2, None)
 
         print("=" * 100, "\nsession xml: ", sessionFn, "\nhole xml: ", holeFn)
-        acqDict = parseSessionXml(ET.parse(sessionFn).getroot())
+        outputDict = parseSessionXml(ET.parse(sessionFn).getroot())
         if holeFn:
-            acqDict2 = parseHoleXml(ET.parse(holeFn).getroot(), acqDict)
-            acqDict.update(**acqDict2)
-        for k, v in sorted(acqDict.items()):
-            print("%s = %s" % (k, v))
-        dicts.append(acqDict)
+            holeDict = parseHoleXml(ET.parse(holeFn).getroot(), outputDict)
+            outputDict.update(**holeDict)
+        for k, v in sorted(outputDict.items()):
+            print(f"{k} = {v}")
 
-    fnOut = os.path.splitext(os.path.basename(path))[0] + ".csv"
-    if os.path.exists(fnOut):
-        os.remove(fnOut)
-    with open(fnOut, 'a+') as ofile:
-        for key in dicts[0]:
-            ofile.write("%s\t" % key)
-        for dic in dicts:
-            ofile.write("\n")
-            for key in dic:
-                ofile.write("%s\t" % dic[key])
-    print("\n=> Output saved to %s" % fnOut)
+        ofile.write("\n")
+        for k, v in outputDict.items():
+            ofile.write(f"{v}\t")
+
+        dicts.append(outputDict)
+
+    ofile.close()
+
+    # write the largest dict header
+    max_dict = max(dicts, key=lambda d: len(d))
+    header = "\t".join(max_dict.keys())
+
+    with open(fnOut, "r+") as ofile:
+        content = ofile.read()
+        ofile.seek(0, 0)
+        ofile.write(header + content)
+
+    print(f"\n=> Output saved to {fnOut}")
 
 
 def parseSessionXml(root):
@@ -92,7 +105,8 @@ def parseSessionXml(root):
         'PhasePlateEnabled': "./{app}PhasePlateEnabled",
         'HoleSize': "./{app}Samples/{app}_items/{app}SampleXml/{app}FilterHolesSettings/{app}HoleSize",
         'HoleSpacing': "./{app}Samples/{app}_items/{app}SampleXml/{app}FilterHolesSettings/{app}HoleSpacing",
-        'SpecimenCarrierType': "./{app}Samples/{app}_items/{app}SampleXml/{app}SpecimenCarrierType",
+        #'SpecimenCarrierType': "./{app}Samples/{app}_items/{app}SampleXml/{app}SpecimenCarrierType",
+        'GridType': "./{app}Samples/{app}_items/{app}SampleXml/{app}GridType",
         'StartDateTime': "./{app}StartDateTime",
         'Autofocus recurrence': "./{app}Samples/{app}_items/{app}SampleXml/{app}TargetAreaTemplate/{app}AutoFocusArea/{app}Recurrence",
         'Autofocus distance': "./{app}Samples/{app}_items/{app}SampleXml/{app}TargetAreaTemplate/{app}AutoFocusArea/{app}RecurrenceDistance",
@@ -134,7 +148,7 @@ def parseSessionXml(root):
 
     if DEBUG:
         for k, v in sorted(acqDict.items()):
-            print("%s = %s" % (k, v))
+            print(f"{k} = {v}")
 
     return acqDict
 
@@ -184,7 +198,7 @@ def parseHoleXml(root, acqDict):
         elem = "./{so}microscopeData/{so}acquisition/{so}camera/{so}CameraSpecificInput/{ar}KeyValueOfstringanyType/{ar}Value/{fr}NumberOffractions"
         acqDict['NumSubFrames'] = root.find(elem.format(**nspace)).text
     else:
-        # count number of DoseFractions for Falcon 3
+        # count number of DoseFractions for Falcon
         elem = "./{so}microscopeData/{so}acquisition/{so}camera/{so}CameraSpecificInput/{ar}KeyValueOfstringanyType/{ar}Value/{fr}DoseFractions"
         try:
             acqDict['NumSubFrames'] = len(root.find(elem.format(**nspace)))
@@ -203,7 +217,7 @@ def parseHoleXml(root, acqDict):
         acqDict['Mode'] = "EER"
         acqDict['GainReference'] = os.path.basename(customDict['Detectors[BM-Falcon].EerGainReference'])
     elif 'Detectors[EF-Falcon].EerGainReference' in customDict:
-        acqDict['NumSubFrames'] = int(int(float(acqDict['ExposureTime']) * float(customDict.get('Detectors[EF-Falcon].FrameRate'))) * 31 / 32)
+        acqDict['NumSubFrames'] = int(int(float(acqDict['ExposureTime']) * float(customDict.get('Detectors[EF-Falcon].FrameRate', 0))) * 31 / 32)
         acqDict['Mode'] = "EER"
         acqDict['GainReference'] = os.path.basename(customDict['Detectors[EF-Falcon].EerGainReference'])
     #if 'AppliedDefocus' in customDict:
@@ -228,7 +242,7 @@ def parseHoleXml(root, acqDict):
 
     if DEBUG:
         for k, v in sorted(acqDict.items()):
-            print("%s = %s" % (k, v))
+            print(f"{k} = {v}")
 
     return acqDict
 
